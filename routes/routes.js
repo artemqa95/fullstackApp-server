@@ -2,6 +2,7 @@ const {Router} = require('express')
 const mysql = require('mysql2/promise')
 const fs = require('fs')
 const shajs = require('sha.js')
+const path = require("path");
 const router = Router()
 
 const dbConfig = {
@@ -18,7 +19,7 @@ async function requestToDb(request) {
 }
 
 function deleteImage(name) {
-    fs.unlink(`./images/${name}`, function(err) {
+    fs.unlink(`./public/images/${name}`, function(err) {
         if(err && err.code === 'ENOENT') {
             console.info("Image doesn't exist, won't remove it.");
         } else if (err) {
@@ -28,6 +29,7 @@ function deleteImage(name) {
         }
     });
 }
+
 
 // CARDS
 
@@ -94,7 +96,7 @@ router.post('/login', async (req, res) => {
     const dbRequest = `SELECT username, password, id FROM users WHERE username = '${body.username}';`
     const connection = await mysql.createConnection(dbConfig)
     const [[match]] = await connection.execute(dbRequest)
-    if (match.username === body.username && match.password === body.password) {
+    if (match?.username === body.username && match.password === body.password) {
         const time = new Date().toString();
         const token = shajs('sha224').update(time).digest('hex')
         const expirationDate = new Date (new Date(time).getTime() + 1000*60*60*2).toString()
@@ -109,6 +111,12 @@ router.post('/login', async (req, res) => {
     }
 
 })
+
+// index
+
+router.get('/*', function (req, res) {
+    res.sendFile(path.join(__dirname, '..' , 'public', 'index.html'));
+});
 
 
 module.exports = router

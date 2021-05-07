@@ -2,7 +2,7 @@ const multer = require('multer')
 const shajs = require('sha.js')
 const storage = multer.diskStorage({
     destination(req, file, cb) {
-        cb(null, 'images')
+        cb(null, './public/images')
     },
     filename(req, file, cb) {
         cb(null, shajs('sha224').update(new Date().toLocaleString()).digest('hex').slice(20) + file.originalname)
